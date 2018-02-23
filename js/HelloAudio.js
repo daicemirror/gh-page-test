@@ -314,12 +314,6 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-console.log('MediaSource.isTypeSupported:', MediaSource.isTypeSupported('audio/wav'));
-console.log('MediaSource.isTypeSupported:', MediaSource.isTypeSupported('audio/mpeg'));
-console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/ogg'));
-console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/wav'));
-console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/mpeg'));
-console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/ogg'));
 document.body.innerText = 'ver 0004';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
@@ -329,6 +323,6 @@ Laya.stage.bgColor = 'none';
 // Laya.init(500,500);
 // Laya.stage.bgColor = null;
 Laya.stage.scrollRect = new Laya.Rectangle(0, 0, Laya.stage.width, Laya.stage.height);
-new audio.test.Test01();
-// new audio.test.Test02(); 
+// new audio.test.Test01();
+new audio.test.Test02();
 //# sourceMappingURL=HelloAudio.js.map
