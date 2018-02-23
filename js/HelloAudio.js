@@ -46,7 +46,8 @@ var audio;
                     audioBitsPerSecond: 96000,
                 };
                 var mediaRecorder = new MediaRecorder(stream, options);
-                console.log('MediaRecorder.audioBitsPerSecond:', MediaRecorder.audioBitsPerSecond);
+                console.log('mediaRecorder.audioBitsPerSecond:', mediaRecorder.audioBitsPerSecond);
+                console.log('mediaRecorder.mimeType:', mediaRecorder.mimeType);
                 // visualize(stream);
                 record.onclick = function () {
                     mediaRecorder.start();
@@ -61,7 +62,9 @@ var audio;
                 mediaRecorder.onstop = function (e) {
                     console.log(mediaRecorder.state);
                     console.log("data available after MediaRecorder.stop() called.");
-                    var blob = mediaRecorder.requestData();
+                };
+                mediaRecorder.ondataavailable = function (e) {
+                    var blob = e.data;
                     console.log("blob.type:", blob.type);
                     var fileReader = new FileReader();
                     fileReader.onload = function () {
@@ -308,7 +311,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0001';
+document.body.innerText = 'ver 0002';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
