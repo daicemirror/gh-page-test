@@ -44,8 +44,6 @@ var audio;
                 console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/mpeg'));
                 var options = {
                     audioBitsPerSecond: 96000,
-                    mimeType: 'audio/mpeg'
-                    // mimeType : 'audio/mpeg'
                 };
                 var mediaRecorder = new MediaRecorder(stream, options);
                 console.log('MediaRecorder.audioBitsPerSecond:', MediaRecorder.audioBitsPerSecond);
