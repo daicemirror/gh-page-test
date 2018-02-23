@@ -21,6 +21,15 @@ var audio;
                     alert('not supported');
                 }
             }
+            //         initRecorder(stream:MediaStream):void{
+            //         }
+            // var audioCtx = new AudioContext();
+            //         var source = audioCtx.createMediaStreamSource(stream);
+            //         // Create a biquadfilter
+            //         var biquadFilter = audioCtx.createBiquadFilter();
+            //         biquadFilter.type = "lowshelf";
+            //         biquadFilter.frequency.value = 1000;
+            //         biquadFilter.gain.value = range.value;
             Test02.prototype.initRecorder = function (stream) {
                 var _this = this;
                 var record = document.createElement('button');
@@ -35,7 +44,7 @@ var audio;
                 console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/mpeg'));
                 var options = {
                     audioBitsPerSecond: 96000,
-                    mimeType: 'audio/wav'
+                    mimeType: 'audio/mpeg'
                     // mimeType : 'audio/mpeg'
                 };
                 var mediaRecorder = new MediaRecorder(stream, options);
