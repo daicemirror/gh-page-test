@@ -12,6 +12,7 @@ var audio;
                 if (navigator.mediaDevices) {
                     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
                         alert('success!');
+                        console.log(stream.getTracks());
                         _this.visualize(stream);
                         // _this.initRecorder(stream);
                     }, function (e) {
