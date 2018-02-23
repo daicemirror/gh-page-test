@@ -308,6 +308,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
+document.body.innerText = 'ver 0001';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
