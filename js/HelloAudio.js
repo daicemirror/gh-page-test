@@ -12,7 +12,8 @@ var audio;
                 if (navigator.mediaDevices) {
                     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
                         alert('success!');
-                        _this.initRecorder(stream);
+                        _this.visualize(stream);
+                        // _this.initRecorder(stream);
                     }, function (e) {
                         alert('failure! ' + e.name);
                     });
@@ -21,8 +22,10 @@ var audio;
                     alert('not supported');
                 }
             }
-            //         initRecorder(stream:MediaStream):void{
-            //         }
+            Test02.prototype.visualize = function (stream) {
+                var audioSourceNode = this._audioCtx.createMediaStreamSource(stream);
+                this._connectAnalyser(audioSourceNode);
+            };
             // var audioCtx = new AudioContext();
             //         var source = audioCtx.createMediaStreamSource(stream);
             //         // Create a biquadfilter
@@ -48,7 +51,6 @@ var audio;
                 var mediaRecorder = new MediaRecorder(stream, options);
                 console.log('mediaRecorder.audioBitsPerSecond:', mediaRecorder.audioBitsPerSecond);
                 console.log('mediaRecorder.mimeType:', mediaRecorder.mimeType);
-                // visualize(stream);
                 record.onclick = function () {
                     mediaRecorder.start();
                     console.log(mediaRecorder.state);
@@ -120,8 +122,8 @@ var audio;
                         console.log('statechange', e);
                     });
                     this.loadUrlList();
-                    this.createAnalyser();
-                    // this.createAnalyser2();
+                    // this.createAnalyser();
+                    this.createAnalyser2();
                 }
             }
             Test01.prototype.createAnalyser = function () {
@@ -311,7 +313,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0003';
+document.body.innerText = 'ver 0004';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
