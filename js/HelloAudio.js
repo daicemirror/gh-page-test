@@ -92,7 +92,7 @@ var audio;
                     absNode = null;
                 };
                 absNode.buffer = audioBuffer;
-                // this._connectAnalyser(absNode);
+                this._connectAnalyser(absNode);
                 absNode.start();
             };
             return Test02;
@@ -311,7 +311,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0002';
+document.body.innerText = 'ver 0003';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
