@@ -316,7 +316,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0005';
+document.body.innerText = 'ver 0006';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
