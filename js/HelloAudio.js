@@ -156,7 +156,18 @@ var audio;
                     return /audio\/wave?/.test(mimeType);
                 };
                 this.notSupported = !navigator.mediaDevices || !AudioContext;
-                this.encoder = 'function () {' +
+                /**
+                 * The `MediaStream` passed into the constructor.
+                 * @type {MediaStream}
+                 */
+                this.stream = stream;
+                /**
+                 * The current state of recording process.
+                 * @type {"inactive"|"recording"|"paused"}
+                 */
+                this.state = 'inactive';
+                this.em = document.createDocumentFragment();
+                this.encoder = this.createWorker('function () {' +
                     'var BYTES_PER_SAMPLE = 2' +
                     'var recorded = []' +
                     'function encode (buffer) {' +
@@ -220,19 +231,7 @@ var audio;
                     'dump(e.data[1])' +
                     '}' +
                     '}' +
-                    '}';
-                /**
-                 * The `MediaStream` passed into the constructor.
-                 * @type {MediaStream}
-                 */
-                this.stream = stream;
-                /**
-                 * The current state of recording process.
-                 * @type {"inactive"|"recording"|"paused"}
-                 */
-                this.state = 'inactive';
-                this.em = document.createDocumentFragment();
-                this.encoder = createWorker(MediaRecorder2.encoder);
+                    '}');
                 var recorder = this;
                 this.encoder.addEventListener('message', function (e) {
                     var event = new Event('dataavailable');
@@ -254,6 +253,18 @@ var audio;
             return MediaRecorder2;
         }());
         test.MediaRecorder2 = MediaRecorder2;
+        /**
+         * Converts RAW audio buffer to compressed audio files.
+         * It will be loaded to Web Worker.
+         * By default, WAVE encoder will be used.
+         * @type {function}
+         *
+         * @example
+         * MediaRecorder.prototype.mimeType = 'audio/ogg'
+         * MediaRecorder.encoder = oggEncoder
+         */
+        // MediaRecorder2.encoder = 
+        //     }
         var Test02 = /** @class */ (function () {
             function Test02() {
                 var _this = this;
@@ -568,7 +579,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0002';
+document.body.innerText = 'ver 0001';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
