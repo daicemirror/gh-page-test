@@ -248,7 +248,7 @@ var audio;
                 // .replace(/^function\s*\(\)\s*{/, '')
                 // .replace(/}$/, '')
                 var blob = new Blob([fn]);
-                return new Worker('../../libs/audio-recorder-polyfill/wave-encoder.js');
+                return new Worker('../libs/audio-recorder-polyfill/wave-encoder.js');
             };
             return MediaRecorder2;
         }());
