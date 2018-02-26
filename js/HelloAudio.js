@@ -243,11 +243,11 @@ var audio;
                 });
             }
             MediaRecorder2.prototype.createWorker = function (fn) {
-                var js = fn
-                    .toString()
-                    .replace(/^function\s*\(\)\s*{/, '')
-                    .replace(/}$/, '');
-                var blob = new Blob([js]);
+                var js = fn;
+                // .toString()
+                // .replace(/^function\s*\(\)\s*{/, '')
+                // .replace(/}$/, '')
+                var blob = new Blob([fn]);
                 return new Worker(URL.createObjectURL(blob));
             };
             return MediaRecorder2;
