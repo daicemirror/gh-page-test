@@ -248,7 +248,7 @@ var audio;
                 // .replace(/^function\s*\(\)\s*{/, '')
                 // .replace(/}$/, '')
                 var blob = new Blob([fn]);
-                return new Worker(URL.createObjectURL(blob));
+                return new Worker('/libs/audio-recorder-polyfill/wave-encoder.js');
             };
             return MediaRecorder2;
         }());
@@ -579,7 +579,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0001';
+document.body.innerText = 'ver 0003';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
