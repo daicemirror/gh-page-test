@@ -25,7 +25,7 @@ var audio;
             }
             Test02.prototype.visualize = function (stream) {
                 var audioSourceNode = this._audioCtx.createMediaStreamSource(stream);
-                this._connectAnalyser(audioSourceNode);
+                this._connectAnalyser(audioSourceNode, false);
             };
             // var audioCtx = new AudioContext();
             //         var source = audioCtx.createMediaStreamSource(stream);
@@ -303,18 +303,20 @@ var audio;
                     }
                 });
             };
-            Test01.prototype.connectAnalyser = function (node) {
+            Test01.prototype.connectAnalyser = function (node, destination) {
+                if (destination === void 0) { destination = true; }
                 var _this = this;
                 this._analyser.disconnect();
                 node.connect(this._analyser);
-                this._analyser.connect(this._audioCtx.destination);
+                if (destination)
+                    this._analyser.connect(this._audioCtx.destination);
             };
             return Test01;
         }());
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0004';
+document.body.innerText = 'ver 0005';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
