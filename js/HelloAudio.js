@@ -49,7 +49,7 @@ var audio;
                 var options = {
                     audioBitsPerSecond: 96000,
                 };
-                var mediaRecorder = new MediaRecorder(stream, options);
+                var mediaRecorder = new MediaRecorder2(stream, options);
                 console.log('mediaRecorder.audioBitsPerSecond:', mediaRecorder.audioBitsPerSecond);
                 console.log('mediaRecorder.mimeType:', mediaRecorder.mimeType);
                 record.onclick = function () {
@@ -316,7 +316,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0007';
+document.body.innerText = 'ver 0002';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
