@@ -1,6 +1,6 @@
 // Copied from https://github.com/chris-rudmin/Recorderjs
 
-module.exports = function () {
+
   var BYTES_PER_SAMPLE = 2
 
   var recorded = []
@@ -71,4 +71,4 @@ module.exports = function () {
       dump(e.data[1])
     }
   }
-}
+
