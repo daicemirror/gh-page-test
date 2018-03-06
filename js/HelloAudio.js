@@ -507,24 +507,32 @@ Laya.stage.scrollRect = new Laya.Rectangle(0, 0, Laya.stage.width, Laya.stage.he
 // new audio.test.Test01();
 var tt2 = new audio.test.Test02();
 // ======================================================
-var CONFIG = {
+/*
+var CONFIG: any =
+{
     host: "192.168.118.114",
     port: 18080,
     zone: "texas",
     useSSL: false,
     debug: false
 };
-var account = 'test5678';
-var password = '123456';
-var smartFox = new SFS2X.SmartFox(CONFIG);
+
+var account:string = 'test5678';
+var password:string = '123456';
+
+var smartFox: SFS2X.SmartFox = new SFS2X.SmartFox(CONFIG);
+
 smartFox.logger.level = SFS2X.LogLevel.DEBUG;
 smartFox.logger.enableConsoleOutput = true;
 smartFox.logger.enableEventDispatching = true;
+
 smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION, onConnect, this);
 smartFox.addEventListener(SFS2X.SFSEvent.LOGIN, onLogin, this);
 smartFox.addEventListener(SFS2X.SFSEvent.ROOM_GROUP_SUBSCRIBE, onRoomGroupSubscribe, this);
 smartFox.addEventListener(SFS2X.SFSEvent.ROOM_JOIN, onRoomJoin, this);
+
 smartFox.addEventListener(SFS2X.SFSEvent.PUBLIC_MESSAGE, onPublicMessage, this);
+
 // smartFox.logger.addEventListener(SFS2X.LoggerEvent.DEBUG, function(e):void{
 //     console.log('DEBUG', e);
 // }, this);
@@ -537,81 +545,120 @@ smartFox.addEventListener(SFS2X.SFSEvent.PUBLIC_MESSAGE, onPublicMessage, this);
 // smartFox.logger.addEventListener(SFS2X.LoggerEvent.ERROR, function(e):void{
 //     console.log('ERROR', e);
 // }, this);
-smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION_LOST, function (e) {
+ 
+smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION_LOST, function(e):void{
     console.log('CONNECTION_LOST', e);
 }, this);
+ 
 smartFox.connect();
-function onConnect(params) {
+
+
+
+
+function onConnect(params: any): void
+{
     console.log('CONNECTION', params);
-    if (params.success) {
+    if (params.success)
+    {
         console.log("連線成功 (SFS2X API 版本: " + smartFox.version + "，連線: " + smartFox.config["host"] + ":" + smartFox.config["port"] + " (zone: " + smartFox.config["zone"] + ")");
         console.log('maxMessageSize: ', smartFox.maxMessageSize);
-        var accountMD5 = md5(account);
-        var passwordMD5 = md5(password);
-        var sfsObj = new SFS2X.SFSObject();
+
+        var accountMD5:string = md5(account);
+        var passwordMD5:string = md5(password);
+
+        var sfsObj: SFS2X.SFSObject = new SFS2X.SFSObject();
         sfsObj.putUtfString("device", "LayaWeb");
         sfsObj.putUtfString("auth_type", "WEB");
+
         smartFox.send(new SFS2X.LoginRequest(accountMD5, passwordMD5, sfsObj, CONFIG.zone));
     }
 }
-function onLogin(params) {
-    var user = params.user;
+
+function onLogin(params: any): void
+{
+    var user: SFS2X.SFSUser = params.user as SFS2X.SFSUser;
     console.log("登入成功 (玩家 ID: " + user.id + "，玩家暱稱: " + account + " (" + user.name + "))");
+
     smartFox.send(new SFS2X.SubscribeRoomGroupRequest("GAME01_CASH_TABLE"));
 }
-var targetRoom;
-function onRoomGroupSubscribe(params) {
+
+var targetRoom:SFS2X.SFSRoom;
+function onRoomGroupSubscribe(params: any): void
+{
     console.log('ROOM_GROUP_SUBSCRIBE', params);
-    var rooms = params.newRooms;
-    rooms.forEach(function (element) {
-        if (element.name == 'CASH_TABLE33')
-            targetRoom = element;
+    var rooms:SFS2X.SFSRoom[] = params.newRooms;
+    rooms.forEach(element => {
+        if(element.name == 'CASH_TABLE33') targetRoom = element;
     });
+
     smartFox.send(new SFS2X.JoinRoomRequest(targetRoom));
-    setTimeout(function () {
+
+    setTimeout(function():void{
         smartFox.send(new SFS2X.JoinRoomRequest(targetRoom));
-    }, 1000);
+    },1000);
 }
-function onRoomJoin(params) {
-    var room = params.room;
+
+function onRoomJoin(params: any): void
+{
+    var room: SFS2X.SFSRoom = params.room;
     console.log("進入房間成功，房間名稱與編號: " + room.name);
 }
-function onSendPublicVoiceCont(ta) {
-    var sfsObj = new SFS2X.SFSObject();
+
+function onSendPublicVoiceCont(ta:Uint8Array): void
+{
+    var sfsObj:SFS2X.SFSObject = new SFS2X.SFSObject();
+    
     sfsObj.putByteArray("voice_cont", Array.prototype.slice.call(ta));
     sfsObj.putUtfString("type", "voice");
+
     smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
 }
-function onSendPublicVoiceCont2(taArr) {
-    var arr = [];
-    while (taArr.length > 0) {
-        var ta = taArr.shift();
+
+function onSendPublicVoiceCont2(taArr:Float32Array[]): void
+{
+    var arr:any[] = [];
+    while(taArr.length>0)
+    {
+        var ta:Float32Array = taArr.shift();
         arr = arr.concat(Array.prototype.slice.call(ta));
     }
-    var f32 = Float32Array.from(arr);
+    
+    var f32:Float32Array = Float32Array.from(arr);
     console.log('before:', f32.byteLength);
     f32 = downSampleBuffer(f32, 48000, 8000);
     console.log('after:', f32.byteLength);
-    var u8 = new Uint8Array(f32.buffer);
+    var u8:Uint8Array = new Uint8Array(f32.buffer);
     arr = Array.prototype.slice.call(u8);
+
     // playSaved(arr);
-    var sfsObj = new SFS2X.SFSObject();
+
+    var sfsObj:SFS2X.SFSObject = new SFS2X.SFSObject();
     sfsObj.putByteArray("voice_cont", arr);
     sfsObj.putUtfString("type", "voice");
-    var o = sfsObj.toBinary();
+
+    var o:Uint8Array = (sfsObj.toBinary() as Uint8Array)
     console.log('sfsObj.toBinary:', o.byteLength, o);
-    console.log('max 65536 is overload?', o.byteLength > 65536);
+    console.log('max 65536 is overload?', o.byteLength>65536);
+
     smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
+
 }
-function onPublicMessage(params) {
+
+function onPublicMessage(params: any): void
+{
     console.log('PUBLIC_MESSAGE', params);
-    var sfsObj = params.data;
-    if (sfsObj.getUtfString("type") == "voice") {
+
+    var sfsObj:SFS2X.SFSObject = params.data;
+    if (sfsObj.getUtfString("type") == "voice")
+    {
         var voice_cont = sfsObj.getByteArray("voice_cont");
+        
         playSaved(voice_cont);
         return;
     }
+
 }
+*/
 function playSaved(voice_cont) {
     var u8 = new Uint8Array(voice_cont);
     var f32 = new Float32Array(u8.buffer);
