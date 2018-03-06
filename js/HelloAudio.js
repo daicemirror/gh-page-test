@@ -224,9 +224,9 @@ var audio;
                 stop.textContent = 'stop';
                 document.body.appendChild(stop);
                 var options = {
-                    audioBitsPerSecond: 8000,
+                    audioBitsPerSecond: 96000,
                 };
-                var mediaRecorder = new MediaRecorder(stream, options);
+                var mediaRecorder = new MediaRecorder(stream);
                 console.log('mediaRecorder.audioBitsPerSecond:', mediaRecorder.audioBitsPerSecond);
                 console.log('mediaRecorder.mimeType:', mediaRecorder.mimeType);
                 record.onclick = function () {
