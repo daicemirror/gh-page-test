@@ -4,11 +4,16 @@ var audio;
     (function (test) {
         var Test02 = /** @class */ (function () {
             function Test02() {
+                // console.log('MediaSource.isTypeSupported:', MediaSource.isTypeSupported('audio/wav'));
+                // console.log('MediaSource.isTypeSupported:', MediaSource.isTypeSupported('audio/mpeg'));
+                // console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/wav'));
+                // console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/mpeg'));
                 var _this = this;
                 this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 this._test01 = new test.Test01(true);
                 this._test01.createAnalyser.apply(this);
                 this._connectAnalyser = this._test01.connectAnalyser.bind(this);
+                console.log('sampleRate:', this._audioCtx.sampleRate);
                 if (navigator.mediaDevices) {
                     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
                         alert('success!');
@@ -16,14 +21,190 @@ var audio;
                         // _this.visualize(stream);
                         _this.initRecorder(stream);
                     }, function (e) {
-                        alert('failure! ' + e.name);
+                        // alert('failure! ' + e.name);
+                        _this.recordMusic();
                     });
                 }
                 else {
                     alert('not supported');
                 }
             }
+            Test02.prototype.recordMusic = function () {
+                var _this = this;
+                var myMusic = document.createElement('audio');
+                document.body.appendChild(myMusic);
+                // myMusic.muted = true;
+                myMusic.controls = true;
+                myMusic.src = 'res/audio/btn.mp3';
+                myMusic.addEventListener('ended', function (e) {
+                    console.log('end:', e);
+                    // _this.playRecord(dataViews);
+                    // _this.playRecord(finish());
+                    // _this.playSaved(channels);
+                    // _this.compressBa(_this.downsampleBuffer(new Uint8Array(ba.buffer), 8000));
+                    window.onSendPublicVoiceCont2(channels[0]);
+                    analyser.disconnect();
+                });
+                myMusic.addEventListener('play', function (e) {
+                    console.log('play:', e);
+                    node.connect(analyser);
+                    analyser.connect(_this._audioCtx.destination);
+                });
+                var node = this._audioCtx.createMediaElementSource(myMusic);
+                this._connectAnalyser(node, true);
+                var ba = new Laya.Byte();
+                var analyser = this._audioCtx.createScriptProcessor();
+                var dataViews = [];
+                var numSamples = 0;
+                var numChannels = 0;
+                var sampleRate = analyser.bufferSize;
+                var channels = [[], []];
+                numChannels = 1;
+                var tt = 0;
+                analyser.onaudioprocess = function (e) {
+                    // var l = e.inputBuffer.numberOfChannels;
+                    // for(var i = 0; i<numChannels; i++){
+                    // channels[i] = e.inputBuffer.getChannelData(i);
+                    // channels[0].push(e.inputBuffer.getChannelData(0).slice());
+                    // }
+                    // encode(channels);
+                    if (tt > 0 && tt < 20) {
+                        console.log("WWWWWWW");
+                        channels[0].push(e.inputBuffer.getChannelData(0).slice());
+                    }
+                    tt++;
+                    // if(tt>20 && tt<30){
+                    //     console.log("WWWWWWW");
+                    //     ba.writeArrayBuffer(e.inputBuffer.getChannelData(0).slice().buffer);
+                    // }
+                    // tt++;
+                };
+                function encode(buffer) {
+                    var len = buffer[0].length, nCh = numChannels, view = new DataView(new ArrayBuffer(len * nCh * 2)), offset = 0;
+                    for (var i = 0; i < len; ++i)
+                        for (var ch = 0; ch < nCh; ++ch) {
+                            var x = buffer[ch][i] * 0x7fff;
+                            view.setInt16(offset, x < 0 ? Math.max(x, -0x8000) : Math.min(x, 0x7fff), true);
+                            offset += 2;
+                        }
+                    dataViews.push(view);
+                    numSamples += len;
+                }
+                ;
+                function finish() {
+                    var dataSize = numChannels * numSamples * 2, view = new DataView(new ArrayBuffer(44));
+                    setString(view, 0, 'RIFF');
+                    view.setUint32(4, 36 + dataSize, true);
+                    setString(view, 8, 'WAVE');
+                    setString(view, 12, 'fmt ');
+                    view.setUint32(16, 16, true);
+                    view.setUint16(20, 1, true);
+                    view.setUint16(22, numChannels, true);
+                    view.setUint32(24, sampleRate, true);
+                    view.setUint32(28, sampleRate * 4, true);
+                    view.setUint16(32, numChannels * 2, true);
+                    view.setUint16(34, 16, true);
+                    setString(view, 36, 'data');
+                    view.setUint32(40, dataSize, true);
+                    dataViews.unshift(view);
+                    var blob = new Blob(dataViews, { type: 'audio/wav' });
+                    // this.cleanup();
+                    return blob;
+                }
+                ;
+                function setString(view, offset, str) {
+                    var len = str.length;
+                    for (var i = 0; i < len; ++i)
+                        view.setUint8(offset + i, str.charCodeAt(i));
+                }
+                ;
+            };
+            Test02.prototype.downsampleBuffer = function (buffer, rate) {
+                // if (rate == sampleRate) {
+                //     return buffer;
+                // }
+                // if (rate > sampleRate) {
+                //     throw "downsampling rate show be smaller than original sample rate";
+                // }
+                var sampleRateRatio = 48000 / rate;
+                var newLength = Math.round(buffer.length / sampleRateRatio);
+                var result = new Float32Array(newLength);
+                var offsetResult = 0;
+                var offsetBuffer = 0;
+                while (offsetResult < result.length) {
+                    var nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+                    var accum = 0, count = 0;
+                    for (var i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+                        accum += buffer[i];
+                        count++;
+                    }
+                    result[offsetResult] = accum / count;
+                    offsetResult++;
+                    offsetBuffer = nextOffsetBuffer;
+                }
+                return result;
+            };
+            Test02.prototype.compressBa = function (ba) {
+                console.log(new Uint8Array(ba).byteLength);
+                // var deflate = new Zlib.Deflate(new Uint8Array(ba));
+                // var compressed:Uint8Array = deflate.compress();
+                //  console.log('compressed:', compressed.byteLength, compressed.buffer.byteLength, compressed);
+                // window.onSendPublicVoiceCont(compressed);
+                window.onSendPublicVoiceCont(new Uint8Array(ba));
+            };
+            // playRecord(views:any[]):void{
+            //     var blob = new Blob(views, { type: 'audio/mpeg' });
+            //     // var myMusic = document.createElement('audio');
+            //     // document.body.appendChild(myMusic);
+            //     // myMusic.muted = true;
+            //     // myMusic.controls = true;
+            //     // myMusic.src = URL.createObjectURL(blob);
+            //     // myMusic.addEventListener('ended', function(e):void{
+            //     //     console.log('end:', e);
+            //     // })
+            //     saveAs(blob, 'ttest'+".mp3");
+            // }
+            // playRecord(b:Blob):void{
+            //     var blob = b;
+            //     var myMusic = document.createElement('audio');
+            //     document.body.appendChild(myMusic);
+            //     myMusic.muted = true;
+            //     myMusic.controls = true;
+            //     myMusic.src = URL.createObjectURL(blob);
+            //     myMusic.addEventListener('ended', function(e):void{
+            //         console.log('end:', e);
+            //     })
+            //     saveAs(blob, 'ttest'+".wav");
+            // }
+            Test02.prototype.playSaved = function (channels) {
+                // var numChannels = channels.length;
+                var numChannels = 1;
+                var num = channels[0].length;
+                var numSamples = channels[0][0].length;
+                var ind = 0;
+                var analyser = this._audioCtx.createScriptProcessor();
+                analyser.onaudioprocess = function (e) {
+                    console.log(e.outputBuffer.getChannelData(0).length, e.outputBuffer.getChannelData(1).length, num, numSamples);
+                    if (ind == num) {
+                        analyser.disconnect();
+                        return;
+                    }
+                    var input;
+                    var output;
+                    for (var i = 0; i < numChannels; i++) {
+                        input = channels[i][ind];
+                        output = e.outputBuffer.getChannelData(i);
+                        for (var j = 0; j < numSamples; j++) {
+                            output[j] = input[j];
+                        }
+                    }
+                    ind++;
+                };
+                // analyser.connect(this._audioCtx.destination);
+                this._connectAnalyser(analyser, true);
+            };
             Test02.prototype.visualize = function (stream) {
+                stream.getTracks;
                 var audioSourceNode = this._audioCtx.createMediaStreamSource(stream);
                 this._connectAnalyser(audioSourceNode, false);
             };
@@ -42,12 +223,8 @@ var audio;
                 var stop = document.createElement('button');
                 stop.textContent = 'stop';
                 document.body.appendChild(stop);
-                console.log('MediaSource.isTypeSupported:', MediaSource.isTypeSupported('audio/wav'));
-                console.log('MediaSource.isTypeSupported:', MediaSource.isTypeSupported('audio/mpeg'));
-                console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/wav'));
-                console.log('MediaRecorder.isTypeSupported:', MediaRecorder.isTypeSupported('audio/mpeg'));
                 var options = {
-                    audioBitsPerSecond: 96000,
+                    audioBitsPerSecond: 8000,
                 };
                 var mediaRecorder = new MediaRecorder(stream, options);
                 console.log('mediaRecorder.audioBitsPerSecond:', mediaRecorder.audioBitsPerSecond);
@@ -71,7 +248,10 @@ var audio;
                     console.log("blob.type:", blob.type);
                     var fileReader = new FileReader();
                     fileReader.onload = function () {
-                        _this.convertArrayBufferToAudioBuffer(this.result);
+                        // _this.convertArrayBufferToAudioBuffer(this.result);
+                        var ab = fileReader.result;
+                        var u8 = new Uint8Array(ab);
+                        playSaved(Array.prototype.slice.call(u8));
                     };
                     fileReader.readAsArrayBuffer(blob);
                 };
@@ -151,7 +331,6 @@ var audio;
                 var analyser = this._analyser = this._audioCtx.createScriptProcessor();
                 var num = analyser.bufferSize / 128;
                 console.log('bufferSize:', analyser.bufferSize);
-                analyser.connect(this._audioCtx.destination);
                 analyser.onaudioprocess = function (e) {
                     var input = e.inputBuffer.getChannelData(0);
                     var output = e.outputBuffer.getChannelData(0);
@@ -316,7 +495,7 @@ var audio;
         test.Test01 = Test01;
     })(test = audio.test || (audio.test = {}));
 })(audio || (audio = {}));
-document.body.innerText = 'ver 0008';
+document.body.innerText = 'ver 0006';
 //初始化引擎
 Config.preserveDrawingBuffer = true;
 Config.isAlpha = true;
@@ -326,5 +505,176 @@ Laya.stage.bgColor = 'none';
 // Laya.stage.bgColor = null;
 Laya.stage.scrollRect = new Laya.Rectangle(0, 0, Laya.stage.width, Laya.stage.height);
 // new audio.test.Test01();
-new audio.test.Test02();
+var tt2 = new audio.test.Test02();
+// ======================================================
+var CONFIG = {
+    host: "192.168.118.114",
+    port: 18080,
+    zone: "texas",
+    useSSL: false,
+    debug: false
+};
+var account = 'test5678';
+var password = '123456';
+var smartFox = new SFS2X.SmartFox(CONFIG);
+smartFox.logger.level = SFS2X.LogLevel.DEBUG;
+smartFox.logger.enableConsoleOutput = true;
+smartFox.logger.enableEventDispatching = true;
+smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION, onConnect, this);
+smartFox.addEventListener(SFS2X.SFSEvent.LOGIN, onLogin, this);
+smartFox.addEventListener(SFS2X.SFSEvent.ROOM_GROUP_SUBSCRIBE, onRoomGroupSubscribe, this);
+smartFox.addEventListener(SFS2X.SFSEvent.ROOM_JOIN, onRoomJoin, this);
+smartFox.addEventListener(SFS2X.SFSEvent.PUBLIC_MESSAGE, onPublicMessage, this);
+// smartFox.logger.addEventListener(SFS2X.LoggerEvent.DEBUG, function(e):void{
+//     console.log('DEBUG', e);
+// }, this);
+// smartFox.logger.addEventListener(SFS2X.LoggerEvent.INFO, function(e):void{
+//     console.log('INFO', e);
+// }, this);
+// smartFox.logger.addEventListener(SFS2X.LoggerEvent.WARNING, function(e):void{
+//     console.log('WARNING', e);
+// }, this);
+// smartFox.logger.addEventListener(SFS2X.LoggerEvent.ERROR, function(e):void{
+//     console.log('ERROR', e);
+// }, this);
+smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION_LOST, function (e) {
+    console.log('CONNECTION_LOST', e);
+}, this);
+smartFox.connect();
+function onConnect(params) {
+    console.log('CONNECTION', params);
+    if (params.success) {
+        console.log("連線成功 (SFS2X API 版本: " + smartFox.version + "，連線: " + smartFox.config["host"] + ":" + smartFox.config["port"] + " (zone: " + smartFox.config["zone"] + ")");
+        console.log('maxMessageSize: ', smartFox.maxMessageSize);
+        var accountMD5 = md5(account);
+        var passwordMD5 = md5(password);
+        var sfsObj = new SFS2X.SFSObject();
+        sfsObj.putUtfString("device", "LayaWeb");
+        sfsObj.putUtfString("auth_type", "WEB");
+        smartFox.send(new SFS2X.LoginRequest(accountMD5, passwordMD5, sfsObj, CONFIG.zone));
+    }
+}
+function onLogin(params) {
+    var user = params.user;
+    console.log("登入成功 (玩家 ID: " + user.id + "，玩家暱稱: " + account + " (" + user.name + "))");
+    smartFox.send(new SFS2X.SubscribeRoomGroupRequest("GAME01_CASH_TABLE"));
+}
+var targetRoom;
+function onRoomGroupSubscribe(params) {
+    console.log('ROOM_GROUP_SUBSCRIBE', params);
+    var rooms = params.newRooms;
+    rooms.forEach(function (element) {
+        if (element.name == 'CASH_TABLE33')
+            targetRoom = element;
+    });
+    smartFox.send(new SFS2X.JoinRoomRequest(targetRoom));
+    setTimeout(function () {
+        smartFox.send(new SFS2X.JoinRoomRequest(targetRoom));
+    }, 1000);
+}
+function onRoomJoin(params) {
+    var room = params.room;
+    console.log("進入房間成功，房間名稱與編號: " + room.name);
+}
+function onSendPublicVoiceCont(ta) {
+    var sfsObj = new SFS2X.SFSObject();
+    sfsObj.putByteArray("voice_cont", Array.prototype.slice.call(ta));
+    sfsObj.putUtfString("type", "voice");
+    smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
+}
+function onSendPublicVoiceCont2(taArr) {
+    var arr = [];
+    while (taArr.length > 0) {
+        var ta = taArr.shift();
+        arr = arr.concat(Array.prototype.slice.call(ta));
+    }
+    var f32 = Float32Array.from(arr);
+    console.log('before:', f32.byteLength);
+    f32 = downSampleBuffer(f32, 48000, 8000);
+    console.log('after:', f32.byteLength);
+    var u8 = new Uint8Array(f32.buffer);
+    arr = Array.prototype.slice.call(u8);
+    // playSaved(arr);
+    var sfsObj = new SFS2X.SFSObject();
+    sfsObj.putByteArray("voice_cont", arr);
+    sfsObj.putUtfString("type", "voice");
+    var o = sfsObj.toBinary();
+    console.log('sfsObj.toBinary:', o.byteLength, o);
+    console.log('max 65536 is overload?', o.byteLength > 65536);
+    smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
+}
+function onPublicMessage(params) {
+    console.log('PUBLIC_MESSAGE', params);
+    var sfsObj = params.data;
+    if (sfsObj.getUtfString("type") == "voice") {
+        var voice_cont = sfsObj.getByteArray("voice_cont");
+        playSaved(voice_cont);
+        return;
+    }
+}
+function playSaved(voice_cont) {
+    var u8 = new Uint8Array(voice_cont);
+    var f32 = new Float32Array(u8.buffer);
+    var r = 1;
+    var l = f32.length;
+    var i = 0;
+    var audioCtx = tt2._audioCtx;
+    var analyser = audioCtx.createScriptProcessor();
+    analyser.onaudioprocess = function (e) {
+        var output = e.outputBuffer.getChannelData(0);
+        console.log(output);
+        for (var j = 0; j < 2048; j++) {
+            var p = Math.round(i / r);
+            if (p == l) {
+                analyser.disconnect();
+                break;
+            }
+            output[j] = f32[p];
+            i++;
+        }
+    };
+    // analyser.connect(this._audioCtx.destination);
+    tt2._connectAnalyser(analyser, true);
+}
+function downSampleBuffer(f32, currRate, tarRate) {
+    if (currRate == tarRate || currRate < tarRate) {
+        return f32;
+    }
+    else {
+        var r = currRate / tarRate;
+        var l = f32.length;
+        var n = Math.floor(l / r) + 1;
+        var result = new Float32Array(n);
+        for (var i = 0; i < n; i++) {
+            result[i] = f32[Math.round(r * i)];
+        }
+        return result;
+    }
+}
+// function downsampleBuffer(buffer, rate):Float32Array {
+//     // if (rate == sampleRate) {
+//     //     return buffer;
+//     // }
+//     // if (rate > sampleRate) {
+//     //     throw "downsampling rate show be smaller than original sample rate";
+//     // }
+//     var sampleRateRatio = Math.round(48000 / rate); //计算压缩率，注意这里要取整数
+//     var newLength = Math.round(buffer.length / sampleRateRatio);
+//     var result = new Float32Array(newLength);
+//     var offsetResult = 0;
+//     var offsetBuffer = 0;
+//     while (offsetResult < result.length) {
+//         var nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+//         var accum = 0,
+//             count = 0;
+//         for (var i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+//             accum += buffer[i];
+//             count++;
+//         }
+//         result[offsetResult] = accum / count;
+//         offsetResult++;
+//         offsetBuffer = nextOffsetBuffer;
+//     }
+//     return result;
+// } 
 //# sourceMappingURL=HelloAudio.js.map
