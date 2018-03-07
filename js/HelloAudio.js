@@ -18,8 +18,9 @@ var audio;
                     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
                         alert('success!');
                         console.log(stream.getTracks());
-                        _this.visualize(stream);
+                        // _this.visualize(stream);
                         // _this.initRecorder(stream);
+                        _this.recordMic(stream);
                     }, function (e) {
                         alert(e.name + ' ' + e.message + ' ' + e.code);
                         _this.recordMusic();
@@ -30,9 +31,20 @@ var audio;
                 }
             }
             Test02.prototype.recordMic = function (stream) {
-                stream.getTracks;
                 var audioSourceNode = this._audioCtx.createMediaStreamSource(stream);
-                this._connectAnalyser(audioSourceNode, false);
+                var analyser = this._audioCtx.createScriptProcessor();
+                var channels = [[], []];
+                analyser.onaudioprocess = function (e) {
+                    channels[0].push(e.inputBuffer.getChannelData(0).slice());
+                };
+                audioSourceNode.connect(analyser);
+                analyser.connect(this._audioCtx.destination);
+                setTimeout(recordend, 5000);
+                function recordend() {
+                    window.onSendPublicVoiceCont2(channels[0]);
+                    analyser.disconnect();
+                    audioSourceNode.disconnect();
+                }
             };
             Test02.prototype.recordMusic = function () {
                 var _this = this;
@@ -618,35 +630,7 @@ function onSendPublicVoiceCont(ta:Uint8Array): void
     smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
 }
 
-function onSendPublicVoiceCont2(taArr:Float32Array[]): void
-{
-    var arr:any[] = [];
-    while(taArr.length>0)
-    {
-        var ta:Float32Array = taArr.shift();
-        arr = arr.concat(Array.prototype.slice.call(ta));
-    }
-    
-    var f32:Float32Array = Float32Array.from(arr);
-    console.log('before:', f32.byteLength);
-    f32 = downSampleBuffer(f32, 48000, 8000);
-    console.log('after:', f32.byteLength);
-    var u8:Uint8Array = new Uint8Array(f32.buffer);
-    arr = Array.prototype.slice.call(u8);
 
-    // playSaved(arr);
-
-    var sfsObj:SFS2X.SFSObject = new SFS2X.SFSObject();
-    sfsObj.putByteArray("voice_cont", arr);
-    sfsObj.putUtfString("type", "voice");
-
-    var o:Uint8Array = (sfsObj.toBinary() as Uint8Array)
-    console.log('sfsObj.toBinary:', o.byteLength, o);
-    console.log('max 65536 is overload?', o.byteLength>65536);
-
-    smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
-
-}
 
 function onPublicMessage(params: any): void
 {
@@ -663,6 +647,27 @@ function onPublicMessage(params: any): void
 
 }
 */
+function onSendPublicVoiceCont2(taArr) {
+    var arr = [];
+    while (taArr.length > 0) {
+        var ta = taArr.shift();
+        arr = arr.concat(Array.prototype.slice.call(ta));
+    }
+    var f32 = Float32Array.from(arr);
+    console.log('before:', f32.byteLength);
+    f32 = downSampleBuffer(f32, 48000, 8000);
+    console.log('after:', f32.byteLength);
+    var u8 = new Uint8Array(f32.buffer);
+    arr = Array.prototype.slice.call(u8);
+    playSaved(arr);
+    // var sfsObj:SFS2X.SFSObject = new SFS2X.SFSObject();
+    // sfsObj.putByteArray("voice_cont", arr);
+    // sfsObj.putUtfString("type", "voice");
+    // var o:Uint8Array = (sfsObj.toBinary() as Uint8Array)
+    // console.log('sfsObj.toBinary:', o.byteLength, o);
+    // console.log('max 65536 is overload?', o.byteLength>65536);
+    // smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
+}
 function playSaved(voice_cont) {
     var u8 = new Uint8Array(voice_cont);
     var f32 = new Float32Array(u8.buffer);
