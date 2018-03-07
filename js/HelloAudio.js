@@ -44,6 +44,9 @@ var audio;
                     window.onSendPublicVoiceCont2(channels[0]);
                     analyser.disconnect();
                     audioSourceNode.disconnect();
+                    stream.getAudioTracks().forEach(function (track) {
+                        track.stop();
+                    });
                 }
             };
             Test02.prototype.recordMusic = function () {
