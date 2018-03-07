@@ -18,8 +18,8 @@ var audio;
                     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
                         alert('success!');
                         console.log(stream.getTracks());
-                        // _this.visualize(stream);
-                        _this.initRecorder(stream);
+                        _this.visualize(stream);
+                        // _this.initRecorder(stream);
                     }, function (e) {
                         // alert('failure! ' + e.name);
                         _this.recordMusic();
@@ -29,6 +29,11 @@ var audio;
                     alert('not supported');
                 }
             }
+            Test02.prototype.recordMic = function (stream) {
+                stream.getTracks;
+                var audioSourceNode = this._audioCtx.createMediaStreamSource(stream);
+                this._connectAnalyser(audioSourceNode, false);
+            };
             Test02.prototype.recordMusic = function () {
                 var _this = this;
                 var myMusic = document.createElement('audio');
