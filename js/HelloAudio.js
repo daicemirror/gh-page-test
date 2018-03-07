@@ -28,6 +28,7 @@ function visualize(stream) {
     };
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
+    var bufferLength = analyser.bufferSize;
     function draw(f32) {
         WIDTH = canvas.width;
         HEIGHT = canvas.height;
@@ -36,7 +37,7 @@ function visualize(stream) {
         canvasCtx.lineWidth = 2;
         canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
         canvasCtx.beginPath();
-        var sliceWidth = WIDTH * 1.0 / 2048;
+        var sliceWidth = WIDTH * 1.0 / bufferLength;
         var x = 0;
         for (var i = 0; i < bufferLength; i++) {
             var v = f32[i] * 10;
