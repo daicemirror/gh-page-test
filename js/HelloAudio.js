@@ -12,7 +12,7 @@ if (navigator.mediaDevices.getUserMedia) {
     var onSuccess = function (stream) {
         var mediaRecorder = new MediaRecorder(stream);
         visualize(stream);
-        mediaRecorder.start();
+        // mediaRecorder.start();
         console.log(mediaRecorder.state);
         console.log("recorder started");
     };
