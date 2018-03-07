@@ -21,7 +21,7 @@ var audio;
                         _this.visualize(stream);
                         // _this.initRecorder(stream);
                     }, function (e) {
-                        // alert('failure! ' + e.name);
+                        alert(e.name + ' ' + e.message + ' ' + e.code);
                         _this.recordMusic();
                     });
                 }
@@ -209,7 +209,6 @@ var audio;
                 this._connectAnalyser(analyser, true);
             };
             Test02.prototype.visualize = function (stream) {
-                stream.getTracks;
                 var audioSourceNode = this._audioCtx.createMediaStreamSource(stream);
                 this._connectAnalyser(audioSourceNode, false);
             };
@@ -308,8 +307,8 @@ var audio;
                         console.log('statechange', e);
                     });
                     this.loadUrlList();
-                    // this.createAnalyser();
-                    this.createAnalyser2();
+                    this.createAnalyser();
+                    // this.createAnalyser2();
                 }
             }
             Test01.prototype.createAnalyser = function () {
