@@ -672,14 +672,13 @@ function onSendPublicVoiceCont2(taArr) {
 function playSaved(voice_cont, bufferSize) {
     var u8 = new Uint8Array(voice_cont);
     var f32 = new Float32Array(u8.buffer);
-    var r = 1;
+    var r = 48000 / 8000;
     var l = f32.length;
     var i = 0;
     var audioCtx = tt2._audioCtx;
     var analyser = audioCtx.createScriptProcessor();
     analyser.onaudioprocess = function (e) {
         var output = e.outputBuffer.getChannelData(0);
-        console.log(output);
         for (var j = 0; j < bufferSize; j++) {
             var p = Math.round(i / r);
             if (p == l) {
