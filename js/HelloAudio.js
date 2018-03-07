@@ -648,6 +648,7 @@ function onPublicMessage(params: any): void
 }
 */
 function onSendPublicVoiceCont2(taArr) {
+    var bufferSize = taArr[0].length;
     var arr = [];
     while (taArr.length > 0) {
         var ta = taArr.shift();
@@ -659,16 +660,16 @@ function onSendPublicVoiceCont2(taArr) {
     console.log('after:', f32.byteLength);
     var u8 = new Uint8Array(f32.buffer);
     arr = Array.prototype.slice.call(u8);
-    playSaved(arr);
-    // var sfsObj:SFS2X.SFSObject = new SFS2X.SFSObject();
-    // sfsObj.putByteArray("voice_cont", arr);
-    // sfsObj.putUtfString("type", "voice");
-    // var o:Uint8Array = (sfsObj.toBinary() as Uint8Array)
-    // console.log('sfsObj.toBinary:', o.byteLength, o);
-    // console.log('max 65536 is overload?', o.byteLength>65536);
+    playSaved(arr, bufferSize);
+    var sfsObj = new SFS2X.SFSObject();
+    sfsObj.putByteArray("voice_cont", arr);
+    sfsObj.putUtfString("type", "voice");
+    var o = sfsObj.toBinary();
+    console.log('sfsObj.toBinary:', o.byteLength, o);
+    console.log('max 65536 is overload?', o.byteLength > 65536);
     // smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
 }
-function playSaved(voice_cont) {
+function playSaved(voice_cont, bufferSize) {
     var u8 = new Uint8Array(voice_cont);
     var f32 = new Float32Array(u8.buffer);
     var r = 1;
@@ -679,7 +680,7 @@ function playSaved(voice_cont) {
     analyser.onaudioprocess = function (e) {
         var output = e.outputBuffer.getChannelData(0);
         console.log(output);
-        for (var j = 0; j < 2048; j++) {
+        for (var j = 0; j < bufferSize; j++) {
             var p = Math.round(i / r);
             if (p == l) {
                 analyser.disconnect();
