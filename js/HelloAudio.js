@@ -10,11 +10,7 @@ if (navigator.mediaDevices.getUserMedia) {
     var constraints = { audio: true };
     var chunks = [];
     var onSuccess = function (stream) {
-        var mediaRecorder = new MediaRecorder(stream);
         visualize(stream);
-        // mediaRecorder.start();
-        console.log(mediaRecorder.state);
-        console.log("recorder started");
     };
     var onError = function (err) {
         console.log('The following error occured: ' + err);
@@ -26,27 +22,22 @@ else {
 }
 function visualize(stream) {
     var source = audioCtx.createMediaStreamSource(stream);
-    var analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
-    source.connect(analyser);
-    //analyser.connect(audioCtx.destination);
-    draw();
-    function draw() {
+    var analyser = audioCtx.createScriptProcessor();
+    analyser.onaudioprocess = function (e) {
+        draw(e.inputBuffer.getChannelData(0));
+    };
+    function draw(f32) {
         WIDTH = canvas.width;
         HEIGHT = canvas.height;
-        requestAnimationFrame(draw);
-        analyser.getByteTimeDomainData(dataArray);
         canvasCtx.fillStyle = 'rgb(200, 200, 200)';
         canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
         canvasCtx.lineWidth = 2;
         canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
         canvasCtx.beginPath();
-        var sliceWidth = WIDTH * 1.0 / bufferLength;
+        var sliceWidth = WIDTH * 1.0 / 2048;
         var x = 0;
         for (var i = 0; i < bufferLength; i++) {
-            var v = dataArray[i] / 128.0;
+            var v = f32[i] * 10;
             var y = v * HEIGHT / 2;
             if (i === 0) {
                 canvasCtx.moveTo(x, y);
