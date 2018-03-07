@@ -209,8 +209,12 @@ var audio;
                 this._connectAnalyser(analyser, true);
             };
             Test02.prototype.visualize = function (stream) {
+                var analyser = this._audioCtx.createScriptProcessor();
+                analyser.onaudioprocess = function (e) {
+                    console.log('onaudioprocess');
+                };
                 var audioSourceNode = this._audioCtx.createMediaStreamSource(stream);
-                this._connectAnalyser(audioSourceNode, false);
+                audioSourceNode.connect(analyser);
             };
             // var audioCtx = new AudioContext();
             //         var source = audioCtx.createMediaStreamSource(stream);
