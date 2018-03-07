@@ -1,9 +1,9 @@
 var audioCtx = new (window.AudioContext || webkitAudioContext)();
-var c = document.createElement('canvas');
-document.body.appendChild(c);
-var canvasCtx = c.getContext("2d");
-c.style.width = "600px";
-c.style.height = "60px";
+var canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+var canvasCtx = canvas.getContext("2d");
+canvas.style.width = "600px";
+canvas.style.height = "60px";
 //main block for doing the audio recording
 if (navigator.mediaDevices.getUserMedia) {
     console.log('getUserMedia supported.');
@@ -12,6 +12,9 @@ if (navigator.mediaDevices.getUserMedia) {
     var onSuccess = function (stream) {
         var mediaRecorder = new MediaRecorder(stream);
         visualize(stream);
+        mediaRecorder.start();
+        console.log(mediaRecorder.state);
+        console.log("recorder started");
     };
     var onError = function (err) {
         console.log('The following error occured: ' + err);
