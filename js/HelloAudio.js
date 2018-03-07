@@ -27,6 +27,7 @@ function visualize(stream) {
         draw(e.inputBuffer.getChannelData(0));
     };
     source.connect(analyser);
+    analyser.connect(audioCtx.destination);
     function draw(f32) {
         WIDTH = canvas.width;
         HEIGHT = canvas.height;
