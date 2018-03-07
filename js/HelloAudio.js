@@ -26,6 +26,7 @@ function visualize(stream) {
     analyser.onaudioprocess = function (e) {
         draw(e.inputBuffer.getChannelData(0));
     };
+    source.connect(analyser);
     function draw(f32) {
         WIDTH = canvas.width;
         HEIGHT = canvas.height;
