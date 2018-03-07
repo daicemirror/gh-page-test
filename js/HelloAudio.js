@@ -663,7 +663,7 @@ function onSendPublicVoiceCont2(taArr) {
     console.log('after:', f32.byteLength);
     var u8 = new Uint8Array(f32.buffer);
     arr = Array.prototype.slice.call(u8);
-    playSaved(arr, bufferSize);
+    // playSaved(arr, bufferSize);
     var sfsObj = new SFS2X.SFSObject();
     sfsObj.putByteArray("voice_cont", arr);
     sfsObj.putUtfString("type", "voice");
@@ -671,6 +671,24 @@ function onSendPublicVoiceCont2(taArr) {
     console.log('sfsObj.toBinary:', o.byteLength, o);
     console.log('max 65536 is overload?', o.byteLength > 65536);
     // smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
+    sendToGD(u8);
+}
+function sendToGD(u8) {
+    var blob = new Blob([u8]);
+    var url = 'https://script.google.com/macros/s/AKfycbxGwIdcplbGGMOM6rf10Jl0HFGZbHaDjxR8s9YKGqxTfLmG0Sg/exec';
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", url, true);
+    var _this = this;
+    xmlhttp.onreadystatechange = function () {
+        console.log(xmlhttp.status);
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            alert(xmlhttp.responseText);
+        }
+    };
+    xmlhttp.upload.onerror = function (a) {
+        console.log('onerror:', a);
+    };
+    xmlhttp.send(blob);
 }
 function playSaved(voice_cont, bufferSize) {
     var u8 = new Uint8Array(voice_cont);
