@@ -354,6 +354,7 @@ var audio;
                     var input = e.inputBuffer.getChannelData(0);
                     var output = e.outputBuffer.getChannelData(0);
                     for (var i = 0; i < input.length; i++) {
+                        // if(input[i] != 0) console.log(input[i]);
                         output[i] = input[i];
                     }
                     for (var j = 0; j < 128; j++) {
@@ -526,32 +527,25 @@ Laya.stage.scrollRect = new Laya.Rectangle(0, 0, Laya.stage.width, Laya.stage.he
 // new audio.test.Test01();
 var tt2 = new audio.test.Test02();
 // ======================================================
-/*
-var CONFIG: any =
-{
+// /*
+var CONFIG = {
     host: "192.168.118.114",
     port: 18080,
     zone: "texas",
     useSSL: false,
     debug: false
 };
-
-var account:string = 'test5678';
-var password:string = '123456';
-
-var smartFox: SFS2X.SmartFox = new SFS2X.SmartFox(CONFIG);
-
+var account = 'test5678';
+var password = '123456';
+var smartFox = new SFS2X.SmartFox(CONFIG);
 smartFox.logger.level = SFS2X.LogLevel.DEBUG;
 smartFox.logger.enableConsoleOutput = true;
 smartFox.logger.enableEventDispatching = true;
-
 smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION, onConnect, this);
 smartFox.addEventListener(SFS2X.SFSEvent.LOGIN, onLogin, this);
 smartFox.addEventListener(SFS2X.SFSEvent.ROOM_GROUP_SUBSCRIBE, onRoomGroupSubscribe, this);
 smartFox.addEventListener(SFS2X.SFSEvent.ROOM_JOIN, onRoomJoin, this);
-
 smartFox.addEventListener(SFS2X.SFSEvent.PUBLIC_MESSAGE, onPublicMessage, this);
-
 // smartFox.logger.addEventListener(SFS2X.LoggerEvent.DEBUG, function(e):void{
 //     console.log('DEBUG', e);
 // }, this);
@@ -564,93 +558,62 @@ smartFox.addEventListener(SFS2X.SFSEvent.PUBLIC_MESSAGE, onPublicMessage, this);
 // smartFox.logger.addEventListener(SFS2X.LoggerEvent.ERROR, function(e):void{
 //     console.log('ERROR', e);
 // }, this);
- 
-smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION_LOST, function(e):void{
+smartFox.addEventListener(SFS2X.SFSEvent.CONNECTION_LOST, function (e) {
     console.log('CONNECTION_LOST', e);
 }, this);
- 
 smartFox.connect();
-
-
-
-
-function onConnect(params: any): void
-{
+function onConnect(params) {
     console.log('CONNECTION', params);
-    if (params.success)
-    {
+    if (params.success) {
         console.log("連線成功 (SFS2X API 版本: " + smartFox.version + "，連線: " + smartFox.config["host"] + ":" + smartFox.config["port"] + " (zone: " + smartFox.config["zone"] + ")");
         console.log('maxMessageSize: ', smartFox.maxMessageSize);
-
-        var accountMD5:string = md5(account);
-        var passwordMD5:string = md5(password);
-
-        var sfsObj: SFS2X.SFSObject = new SFS2X.SFSObject();
+        var accountMD5 = md5(account);
+        var passwordMD5 = md5(password);
+        var sfsObj = new SFS2X.SFSObject();
         sfsObj.putUtfString("device", "LayaWeb");
         sfsObj.putUtfString("auth_type", "WEB");
-
         smartFox.send(new SFS2X.LoginRequest(accountMD5, passwordMD5, sfsObj, CONFIG.zone));
     }
 }
-
-function onLogin(params: any): void
-{
-    var user: SFS2X.SFSUser = params.user as SFS2X.SFSUser;
+function onLogin(params) {
+    var user = params.user;
     console.log("登入成功 (玩家 ID: " + user.id + "，玩家暱稱: " + account + " (" + user.name + "))");
-
     smartFox.send(new SFS2X.SubscribeRoomGroupRequest("GAME01_CASH_TABLE"));
 }
-
-var targetRoom:SFS2X.SFSRoom;
-function onRoomGroupSubscribe(params: any): void
-{
+var targetRoom;
+function onRoomGroupSubscribe(params) {
     console.log('ROOM_GROUP_SUBSCRIBE', params);
-    var rooms:SFS2X.SFSRoom[] = params.newRooms;
-    rooms.forEach(element => {
-        if(element.name == 'CASH_TABLE33') targetRoom = element;
-    });
-
-    smartFox.send(new SFS2X.JoinRoomRequest(targetRoom));
-
-    setTimeout(function():void{
-        smartFox.send(new SFS2X.JoinRoomRequest(targetRoom));
-    },1000);
+    // var rooms:SFS2X.SFSRoom[] = params.newRooms;
+    // rooms.forEach(element => {
+    //     if(element.name == 'CASH_TABLE33') targetRoom = element;
+    // });
+    smartFox.send(new SFS2X.JoinRoomRequest(5));
+    // setTimeout(function():void{
+    //     smartFox.send(new SFS2X.JoinRoomRequest(targetRoom));
+    // },1000);
 }
-
-function onRoomJoin(params: any): void
-{
-    var room: SFS2X.SFSRoom = params.room;
+function onRoomJoin(params) {
+    var room = params.room;
     console.log("進入房間成功，房間名稱與編號: " + room.name);
 }
-
-function onSendPublicVoiceCont(ta:Uint8Array): void
-{
-    var sfsObj:SFS2X.SFSObject = new SFS2X.SFSObject();
-    
+function onSendPublicVoiceCont(ta) {
+    var sfsObj = new SFS2X.SFSObject();
     sfsObj.putByteArray("voice_cont", Array.prototype.slice.call(ta));
     sfsObj.putUtfString("type", "voice");
-
     smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
 }
-
-
-
-function onPublicMessage(params: any): void
-{
+function onPublicMessage(params) {
     console.log('PUBLIC_MESSAGE', params);
-
-    var sfsObj:SFS2X.SFSObject = params.data;
-    if (sfsObj.getUtfString("type") == "voice")
-    {
+    var sfsObj = params.data;
+    if (sfsObj.getUtfString("type") == "voice") {
         var voice_cont = sfsObj.getByteArray("voice_cont");
-        
-        playSaved(voice_cont);
+        // playSaved(voice_cont, false);
         return;
     }
-
 }
-*/
+// */
 function onSendPublicVoiceCont2(taArr) {
+    var _this = this;
     var bufferSize = taArr[0].length;
     var arr = [];
     while (taArr.length > 0) {
@@ -661,20 +624,26 @@ function onSendPublicVoiceCont2(taArr) {
     console.log('before:', f32.byteLength);
     f32 = downSampleBuffer(f32, 48000, 8000);
     console.log('after:', f32.byteLength);
+    //little endian to big endian
+    f32 = swapEndian32(f32);
     var u8 = new Uint8Array(f32.buffer);
+    var deflate = new Zlib.Deflate(u8);
+    u8 = deflate.compress();
+    console.log('compressed:', u8.byteLength);
     arr = Array.prototype.slice.call(u8);
-    playSaved(arr, bufferSize);
+    // playSaved(arr, bufferSize);
     var sfsObj = new SFS2X.SFSObject();
     sfsObj.putByteArray("voice_cont", arr);
     sfsObj.putUtfString("type", "voice");
     var o = sfsObj.toBinary();
     console.log('sfsObj.toBinary:', o.byteLength, o);
     console.log('max 65536 is overload?', o.byteLength > 65536);
-    // smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
-    //sendToGD(u8);
+    smartFox.send(new SFS2X.PublicMessageRequest("public_voice_cont", sfsObj, targetRoom));
+    // sendToGD(u8);
 }
-function sendToGD(u8) {
-    var blob = new Blob([u8]);
+function sendToGD(dataUrl) {
+    // function sendToGD(u8:Uint8Array):void{
+    // var blob:Blob = new Blob([u8]);
     var url = 'https://script.google.com/macros/s/AKfycbxGwIdcplbGGMOM6rf10Jl0HFGZbHaDjxR8s9YKGqxTfLmG0Sg/exec';
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", url, true);
@@ -683,16 +652,42 @@ function sendToGD(u8) {
         console.log(xmlhttp.status);
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             alert(xmlhttp.responseText);
+            document.body.innerHTML = xmlhttp.responseText;
+            var image = new Image();
+            image.height = 100;
+            // image.title = file.name;
+            image.src = xmlhttp.responseText;
+            document.body.appendChild(image);
         }
     };
     xmlhttp.upload.onerror = function (a) {
         console.log('onerror:', a);
     };
-    xmlhttp.send(blob);
+    var fromData = new FormData();
+    // fromData.append("file", blob);
+    fromData.append('name', 'test-image');
+    fromData.append('image', dataUrl);
+    xmlhttp.open("post", url, true);
+    xmlhttp.send(fromData);
 }
-function playSaved(voice_cont, bufferSize) {
+function swapEndian32(f32) {
+    var dv = new DataView(f32.buffer);
+    var re = [];
+    var l = f32.length;
+    for (var i = 0; i < l; i++) {
+        re[re.length] = dv.getFloat32(i * 4);
+    }
+    return Float32Array.from(re);
+}
+function playSaved(voice_cont, littleEndian) {
+    var _this = this;
     var u8 = new Uint8Array(voice_cont);
+    var deflate = new Zlib.Inflate(voice_cont);
+    u8 = deflate.decompress();
     var f32 = new Float32Array(u8.buffer);
+    if (!littleEndian) {
+        f32 = swapEndian32(f32);
+    }
     var r = 48000 / 8000;
     var l = f32.length;
     var i = 0;
@@ -700,12 +695,13 @@ function playSaved(voice_cont, bufferSize) {
     var analyser = audioCtx.createScriptProcessor();
     analyser.onaudioprocess = function (e) {
         var output = e.outputBuffer.getChannelData(0);
-        for (var j = 0; j < bufferSize; j++) {
+        for (var j = 0; j < 2048; j++) {
             var p = Math.round(i / r);
             if (p == l) {
                 analyser.disconnect();
                 break;
             }
+            // output[j] = f32[p]*Math.pow(10, 37);
             output[j] = f32[p];
             i++;
         }
@@ -753,5 +749,58 @@ function downSampleBuffer(f32, currRate, tarRate) {
 //         offsetBuffer = nextOffsetBuffer;
 //     }
 //     return result;
-// } 
+// }
+// input();
+function input() {
+    var _input = document.createElement('input');
+    _input.style.position = 'absolute';
+    _input.style.zIndex = '9999';
+    _input.type = 'file';
+    // _input.multiple = true;
+    _input.onchange = previewFiles;
+    document.body.appendChild(_input);
+    // _input.click();
+    function previewFiles() {
+        var files = _input.files;
+        function readAndPreview(file) {
+            // Make sure `file.name` matches our extensions criteria
+            if (/\.(jpe?g|png|gif)$/i.test(file.name)) {
+                var reader = new FileReader();
+                reader.addEventListener("load", function () {
+                    var image = new Image();
+                    image.height = 100;
+                    image.title = file.name;
+                    image.src = this.result;
+                    document.body.appendChild(image);
+                    sendToGD(this.result);
+                }, false);
+                reader.readAsDataURL(file);
+            }
+        }
+        //有時沒選檔案也會進來, files.lenght可能為0
+        if (files) {
+            [].forEach.call(files, readAndPreview);
+        }
+    }
+}
+// download();
+function download() {
+    var url = 'https://script.google.com/macros/s/AKfycbxGwIdcplbGGMOM6rf10Jl0HFGZbHaDjxR8s9YKGqxTfLmG0Sg/exec';
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    var _this = this;
+    xmlhttp.onreadystatechange = function () {
+        console.log(xmlhttp.status);
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            alert(xmlhttp.responseText);
+            document.body.innerHTML = xmlhttp.responseText;
+            var image = new Image();
+            image.height = 100;
+            // image.title = file.name;
+            image.src = xmlhttp.responseText;
+            document.body.appendChild(image);
+        }
+    };
+    xmlhttp.send();
+}
 //# sourceMappingURL=HelloAudio.js.map

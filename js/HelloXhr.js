@@ -167,7 +167,7 @@ var xhr;
                 // xmlhttp.upload.onerror = function(a):void{
                 //     console.log('onerror:', a);
                 // }
-                xmlhttp.send(blob);
+                // xmlhttp.send(blob);
                 var fromData = new FormData();
                 fromData.append("file", blob);
                 xmlhttp.open("post", url, true);

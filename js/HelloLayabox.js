@@ -4,7 +4,7 @@ Config.isAntialias = true;
 //创建舞台，默认背景色是黑色的
 //console.debug(Laya.init(600, 300)); 
 console.debug(Laya.init(500, 180, laya.webgl.WebGL));
-alert(Laya.Render.isWebGL);
+// alert(Laya.Render.isWebGL);
 // Laya.stage.fullScreenEnabled = true;
 Laya.stage.scaleMode = Laya.Stage.SCALE_FULL;
 //Laya.stage.alignH = Laya.Stage.ALIGN_CENTER;
@@ -46,14 +46,19 @@ Laya.stage.addChild(txt);
 //             function _fullScreenChanged():void{
 // 		Laya.stage.event(/*laya.events.Event.FULL_SCREEN_CHANGE*/"fullscreenchange");
 // 	}
-function toggleFullScreen() {
+function toggleFullScreen(e) {
+    console.log(e);
     // alert(Laya.stage.mouseX + "_" + Laya.stage.mouseY);
+    console.log(txt.hitTestPoint(Laya.stage.mouseX, Laya.stage.mouseY));
     if (txt.hitTestPoint(Laya.stage.mouseX, Laya.stage.mouseY)) {
+        console.log(111);
     }
     else {
+        console.log(222);
         // alert("123456");
         return;
     }
+    console.log(333);
     // alert(txt.hitTestPoint(Laya.stage.mouseX, Laya.stage.mouseY));
     // return;
     if (!document.fullscreenElement && // alternative standard method
@@ -86,8 +91,9 @@ function toggleFullScreen() {
         }
     }
 }
-laya.renders.Render.canvas.addEventListener('mousedown', toggleFullScreen);
+// laya.renders.Render.canvas.addEventListener('mousedown', toggleFullScreen);
 laya.renders.Render.canvas.addEventListener('touchstart', toggleFullScreen);
+// laya.renders.Render.canvas.addEventListener('touchend',toggleFullScreen);
 function toggleFullScreen2() {
     alert(txt.hitTestPoint(Laya.stage.mouseX, Laya.stage.mouseY));
 }
